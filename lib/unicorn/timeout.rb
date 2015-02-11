@@ -17,6 +17,7 @@ module Unicorn
       t = setup_mon_thread
 
       begin
+        Thread.current[:env] = env
         @app.call(env)
       ensure
         kill_mon_thread(t)
@@ -36,7 +37,7 @@ module Unicorn
       def kill_main_thread(t)
         Thread.exclusive do
           begin
-            self.class.handler.call(t.backtrace)
+            self.class.handler.call(t.backtrace, t[:env])
           ensure
             Process.kill(self.class.signal, Process.pid)
           end
